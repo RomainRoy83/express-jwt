@@ -10,8 +10,7 @@ authRouter.post("/checkCredentials", (req, res) => {
       User.verifyPassword(password, user.hashedPassword).then(
         (passwordIsCorrect) => {
           if (passwordIsCorrect) {
-            res.status(200).send(calculateToken(email));
-            User.update(user.id, { token: token });
+            const token = (calculateToken(email, user.id));
             res.cookie("user_token", token);
             res.send();
           } else res.status(401).send("Invalid credentials");

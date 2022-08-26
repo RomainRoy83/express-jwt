@@ -51,13 +51,12 @@ const findByEmailWithDifferentId = (email, id) => {
 
 const findByToken = (token) => {
   return db
-    .query("SELECT * FROM users WHERE token = ?", [token])
+    .query("SELECT * FROM users WHERE id = ?", [token])
     .then(([results]) => results[0]);
 };
 
 const create = ({ firstname, lastname, city, language, email, password }) => {
   return hashPassword(password).then((hashedPassword) => {
-    const token = calculateToken(email);
     return db
       .query("INSERT INTO users SET ?", {
         firstname,
@@ -66,7 +65,6 @@ const create = ({ firstname, lastname, city, language, email, password }) => {
         language,
         email,
         hashedPassword,
-        token,
       })
       .then(([result]) => {
         const id = result.insertId;

@@ -1,12 +1,12 @@
 const moviesRouter = require("express").Router();
 const Movie = require("../models/movie");
 const User = require("../models/user");
-const { calculateToken } = require("../helpers/users");
+const { calculateToken, decodeToken } = require("../helpers/users");
 
 moviesRouter.get("/", async (req, res) => {
   let user = "";
-  const cookieInfo = req.cookies.token;
-  if (req.cookies.token) user = await User.findByToken(cookieInfo);
+  const decoded = decodeToken(req.cookies.user_token);
+  if (req.cookies.user_token) user = await User.findByToken(decoded.userId);
 
   const { max_duration, color } = req.query;
   Movie.findMany({ filters: { max_duration, color, user_id: user.id } })
@@ -34,14 +34,14 @@ moviesRouter.get("/:id", (req, res) => {
 });
 
 moviesRouter.post("/", async (req, res) => {
-  const cookieInfo = req.cookies.token;
-  const user = await User.findByToken(cookieInfo);
-  if (!user) res.status(401).send("No user found");
   const error = Movie.validate(req.body);
+  const cookieInfo = req.cookies.user_token;
   if (error) {
     res.status(422).json({ validationErrors: error.details });
   } else {
-    Movie.create(req.body, user.id)
+    const decoded = decodeToken(cookieInfo);
+    console.log("decoded token :", decoded);
+    Movie.create(req.body, decoded.userId)
       .then((createdMovie) => {
         res.status(201).json(createdMovie);
       })

@@ -1,5 +1,5 @@
-const { setupRoutes } = require('./routes');
-const express = require('express');
+const { setupRoutes } = require("./routes");
+const express = require("express");
 const app = express();
 
 const port = process.env.PORT || 3000;

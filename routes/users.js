@@ -1,5 +1,6 @@
 const usersRouter = require("express").Router();
 const User = require("../models/user");
+const { calculateToken } = require("../helpers/users");
 
 usersRouter.get("/", (req, res) => {
   const { language } = req.query;
@@ -61,7 +62,10 @@ usersRouter.put("/:id", (req, res) => {
       if (otherUserWithEmail) return Promise.reject("DUPLICATE_EMAIL");
       validationErrors = User.validate(req.body, false);
       if (validationErrors) return Promise.reject("INVALID_DATA");
-      return User.update(req.params.id, req.body);
+      const token = calculateToken(req.body.email);
+      return User.update(req.params.id, req.body, token);
+      res.cookie("user_token", token);
+      res.send();
     })
     .then(() => {
       res.status(200).json({ ...existingUser, ...req.body });
